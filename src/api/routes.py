@@ -1,16 +1,11 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint, session
+from flask import request, jsonify, Blueprint, session
 from api.models import db, User
 from api.utils import generate_sitemap, APIException
-from flask_cors import CORS
-import datetime
 
 api = Blueprint('api', __name__)
-
-# Allow CORS requests to this API
-CORS(api, supports_credentials=True)
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -21,17 +16,18 @@ def handle_hello():
 
 @api.route('/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({"message": "Email and password are required"}), 400
-    
-    
-    existing_user = User.query.filter_by(email=data['email']).first()
-    if existing_user:
-        return jsonify({"message": "User already exists"}), 400
-    
     try:
+        data = request.get_json()
+
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({"message": "Email and password are required"}), 400
+        
+        
+        existing_user = User.query.filter_by(email=data['email']).first()
+        if existing_user:
+            return jsonify({"message": "User already exists"}), 400
+        
+        
         user = User()
         user.email = data['email']
         user.set_password(data['password'])
@@ -40,7 +36,7 @@ def signup():
         db.session.add(user)
         db.session.commit()
         
-        # Create session
+        
         session['user_id'] = user.id
         session.permanent = True
         
@@ -51,31 +47,36 @@ def signup():
         
     except Exception as e:
         db.session.rollback()
+        print("Signup error:", str(e))
         return jsonify({"message": "Error creating user"}), 500
 
 @api.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({"message": "Email and password are required"}), 400
-    
-    user = User.query.filter_by(email=data['email']).first()
-    
-    if not user or not user.check_password(data['password']):
-        return jsonify({"message": "Invalid credentials"}), 401
-    
-    if not user.is_active:
-        return jsonify({"message": "User account is deactivated"}), 401
-    
-    # Create session
-    session['user_id'] = user.id
-    session.permanent = True
-    
-    return jsonify({
-        "message": "Login successful",
-        "user": user.serialize()
-    }), 200
+    try:
+        data = request.get_json()
+
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({"message": "Email and password are required"}), 400
+        
+        user = User.query.filter_by(email=data['email']).first()
+        
+        if not user or not user.check_password(data['password']):
+            return jsonify({"message": "Invalid credentials"}), 401
+        
+        if not user.is_active:
+            return jsonify({"message": "User account is deactivated"}), 401        
+        
+        session['user_id'] = user.id
+        session.permanent = True
+        
+        return jsonify({
+            "message": "Login successful",
+            "user": user.serialize()
+        }), 200
+        
+    except Exception as e:
+        print("Login error:", str(e))
+        return jsonify({"message": "Error during login"}), 500
 
 @api.route('/logout', methods=['POST'])
 def logout():
@@ -94,8 +95,9 @@ def private_route():
         return jsonify({"message": "User not found"}), 401
     
     return jsonify({
-        "message": "This is private data",
-        "user": user.serialize()
+        "message": "This is private data - Welcome to the protected area!",
+        "user": user.serialize(),
+        "private_content": "This is sensitive information that only logged-in users can see."
     }), 200
 
 @api.route('/user', methods=['GET'])
