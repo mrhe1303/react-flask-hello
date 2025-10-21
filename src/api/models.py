@@ -1,4 +1,3 @@
-# src/api/models.py - Versión compatible con SQLAlchemy 1.4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Boolean, DateTime, Column, Integer
 from datetime import datetime
@@ -11,7 +10,7 @@ def generate_salt():
     return secrets.token_hex(16)
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'users'  # Cambiar de 'user' a 'users'
     
     id = Column(Integer, primary_key=True)
     email = Column(String(120), unique=True, nullable=False)
