@@ -1,16 +1,15 @@
+// Layout.jsx - Versión corregida
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export const Layout = ({ children }) => {
     const navigate = useNavigate();
     
-    
     const getUser = () => {
         try {
             const userData = sessionStorage.getItem('user');
             return userData ? JSON.parse(userData) : null;
         } catch (error) {
-            console.error('Error parsing user data:', error);
             return null;
         }
     };
@@ -46,12 +45,12 @@ export const Layout = ({ children }) => {
                                     Welcome, {user.email}
                                 </span>
                                 <Link className="nav-link" to="/private">
-                                    Private
+                                    Private Area
                                 </Link>
                                 <button 
                                     className="nav-link btn btn-link"
                                     onClick={handleLogout}
-                                    style={{ border: 'none', background: 'none' }}
+                                    style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                                 >
                                     Logout
                                 </button>

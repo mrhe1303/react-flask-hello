@@ -1,3 +1,4 @@
+// Private.jsx - Versión mejorada
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,28 +10,27 @@ export const Private = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const checkAuth = async () => {
-            
-            const storedUser = sessionStorage.getItem('user');
-            
-            if (!storedUser) {
-                navigate('/login');
-                return;
-            }
+        checkAuthentication();
+    }, []);
 
-            try {
-                const userData = JSON.parse(storedUser);
-                setUser(userData);
-                await fetchPrivateData();
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                sessionStorage.removeItem('user');
-                navigate('/login');
-            }
-        };
+    const checkAuthentication = async () => {
+        const storedUser = sessionStorage.getItem('user');
+        
+        if (!storedUser) {
+            navigate('/login');
+            return;
+        }
 
-        checkAuth();
-    }, [navigate]);
+        try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            await fetchPrivateData();
+        } catch (error) {
+            console.error('Error:', error);
+            sessionStorage.removeItem('user');
+            navigate('/login');
+        }
+    };
 
     const fetchPrivateData = async () => {
         try {
@@ -41,32 +41,20 @@ export const Private = () => {
             if (response.ok) {
                 const data = await response.json();
                 setPrivateData(data);
-            } else {
-                
+            } else if (response.status === 401) {
+                // Unauthorized - session expired
                 sessionStorage.removeItem('user');
                 navigate('/login');
+            } else {
+                throw new Error('Failed to fetch private data');
             }
         } catch (error) {
             console.error('Error fetching private data:', error);
-            setError('Failed to fetch private data');
+            setError('You are not authorized to view this page');
             sessionStorage.removeItem('user');
             navigate('/login');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleLogout = async () => {
-        try {
-            await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logout`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-        } catch (error) {
-            console.error('Error during logout:', error);
-        } finally {
-            sessionStorage.removeItem('user');
-            navigate('/login');
         }
     };
 
@@ -87,14 +75,8 @@ export const Private = () => {
             <div className="row justify-content-center">
                 <div className="col-md-8">
                     <div className="card">
-                        <div className="card-header d-flex justify-content-between align-items-center">
+                        <div className="card-header">
                             <h3 className="mb-0">Private Dashboard</h3>
-                            <button 
-                                className="btn btn-outline-danger btn-sm"
-                                onClick={handleLogout}
-                            >
-                                Logout
-                            </button>
                         </div>
                         <div className="card-body">
                             {error && (
@@ -102,6 +84,7 @@ export const Private = () => {
                                     {error}
                                 </div>
                             )}
+                            
                             {user && (
                                 <div className="mb-4">
                                     <h4>Welcome, {user.email}!</h4>
@@ -111,11 +94,19 @@ export const Private = () => {
                                     </p>
                                 </div>
                             )}
+                            
                             {privateData && (
                                 <div className="alert alert-success">
-                                    <h5>Private Data</h5>
-                                    <p>{privateData.message}</p>
-                                    <pre>{JSON.stringify(privateData, null, 2)}</pre>
+                                    <h5>🎉 Success! You're authenticated!</h5>
+                                    <p><strong>{privateData.message}</strong></p>
+                                    <p>{privateData.private_content}</p>
+                                    <hr />
+                                    <h6>Your User Information:</h6>
+                                    <ul>
+                                        <li>Email: {privateData.user.email}</li>
+                                        <li>Active: {privateData.user.is_active ? 'Yes' : 'No'}</li>
+                                        <li>Account Created: {new Date(privateData.user.created_at).toLocaleString()}</li>
+                                    </ul>
                                 </div>
                             )}
                         </div>

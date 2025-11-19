@@ -27,7 +27,7 @@ export const Signup = () => {
 
             if (response.ok) {
                 sessionStorage.setItem('user', JSON.stringify(data.user));
-                navigate('/private');
+                navigate('/login');
             } else {
                 setError(data.message || 'Error creating account');
             }
