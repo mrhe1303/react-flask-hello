@@ -34,7 +34,7 @@ export const Private = () => {
 
     const fetchPrivateData = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/private`, {
+            const response = await fetch('/api/private', {
                 credentials: 'include'
             });
 

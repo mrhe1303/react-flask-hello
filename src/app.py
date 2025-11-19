@@ -19,34 +19,17 @@ static_file_dir = os.path.join(os.path.dirname(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
-# Configuración de sesiones - CORREGIDA
+# Configuración para Codespaces
 app.secret_key = os.environ.get('FLASK_APP_KEY', 'sample-key-change-in-production')
 
-# Configuración mejorada para desarrollo y producción
-if ENV == "development":
-    # Configuración para desarrollo
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    app.config['SESSION_COOKIE_SECURE'] = False  # False en desarrollo
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-else:
-    # Configuración para producción
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-    app.config['SESSION_COOKIE_SECURE'] = True
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-
+# Configuración específica para Codespaces
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
-# Configuración CORS mejorada
-CORS(app, 
-     origins=[
-         "https://expert-spork-rkungjb66whl-3000.app.github.dev",
-         "https://expert-spork-rkungjb66whl-3001.app.github.dev",
-         "http://localhost:3000",
-         "http://localhost:3001"
-     ],  # Permite ambos puertos de Codespaces
-     supports_credentials=True, 
-     methods=["GET", "POST", "PUT", "DELETE"],
-     allow_headers=["Content-Type", "Authorization"])
+# CORS para Codespaces - permitir todos los orígenes temporalmente
+CORS(app, origins=["*"], supports_credentials=True)
 
 # database configuration
 db_url = os.getenv("DATABASE_URL")

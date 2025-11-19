@@ -1,8 +1,7 @@
-// Layout.jsx - Versión corregida
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 
-export const Layout = ({ children }) => {
+export const Layout = () => {
     const navigate = useNavigate();
     
     const getUser = () => {
@@ -18,7 +17,7 @@ export const Layout = ({ children }) => {
 
     const handleLogout = async () => {
         try {
-            await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logout`, {
+            await fetch('/api/logout', {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -34,9 +33,9 @@ export const Layout = ({ children }) => {
         <div>
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
                 <div className="container">
-                    <Link className="navbar-brand" to="/">
+                    <NavLink className="navbar-brand" to="/">
                         My App
-                    </Link>
+                    </NavLink>
                     
                     <div className="navbar-nav ms-auto">
                         {user ? (
@@ -44,9 +43,9 @@ export const Layout = ({ children }) => {
                                 <span className="navbar-text me-3">
                                     Welcome, {user.email}
                                 </span>
-                                <Link className="nav-link" to="/private">
+                                <NavLink className="nav-link" to="/private">
                                     Private Area
-                                </Link>
+                                </NavLink>
                                 <button 
                                     className="nav-link btn btn-link"
                                     onClick={handleLogout}
@@ -57,18 +56,20 @@ export const Layout = ({ children }) => {
                             </>
                         ) : (
                             <>
-                                <Link className="nav-link" to="/login">
+                                <NavLink className="nav-link" to="/login">
                                     Login
-                                </Link>
-                                <Link className="nav-link" to="/signup">
+                                </NavLink>
+                                <NavLink className="nav-link" to="/signup">
                                     Sign Up
-                                </Link>
+                                </NavLink>
                             </>
                         )}
                     </div>
                 </div>
             </nav>
-            <main>{children}</main>
+            <main>
+                <Outlet /> {/* ESTA ES LA CLAVE - renderiza los componentes hijos */}
+            </main>
         </div>
     );
 };
