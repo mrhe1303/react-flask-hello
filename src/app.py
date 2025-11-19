@@ -38,7 +38,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 # Configuración CORS mejorada
 CORS(app, 
-     origins=[os.environ.get('FRONTEND_URL', 'http://localhost:3000')], 
+     origins=["*"],  # Permite todos los orígenes en Codespaces
      supports_credentials=True, 
      methods=["GET", "POST", "PUT", "DELETE"],
      allow_headers=["Content-Type", "Authorization"])
