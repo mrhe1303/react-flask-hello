@@ -38,7 +38,12 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 # Configuración CORS mejorada
 CORS(app, 
-     origins=["*"],  # Permite todos los orígenes en Codespaces
+     origins=[
+         "https://expert-spork-rkungjb66whl-3000.app.github.dev",
+         "https://expert-spork-rkungjb66whl-3001.app.github.dev",
+         "http://localhost:3000",
+         "http://localhost:3001"
+     ],  # Permite ambos puertos de Codespaces
      supports_credentials=True, 
      methods=["GET", "POST", "PUT", "DELETE"],
      allow_headers=["Content-Type", "Authorization"])
